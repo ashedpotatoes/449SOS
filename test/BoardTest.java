@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import src.main.Board;
+import src.main.Board.Cell;
 
 public class BoardTest {
 
@@ -26,7 +27,7 @@ public class BoardTest {
         // Check all cells are initialized to 0
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                assertEquals(0, board.getCell(i, j, 3));
+                assertEquals(Cell.EMPTY, board.getCell(i, j, 3));
             }
         }
     }
@@ -36,7 +37,7 @@ public class BoardTest {
         // Attempt to make a move in an invalid row (-1)
         board.makeMove(-1, 0, 3);
         // Verify the cell remains unchanged (should still be 0)
-        assertEquals(0, board.getCell(0, 0, 3));
+        assertEquals(Cell.EMPTY, board.getCell(0, 0, 3));
     }
 
     @Test
@@ -44,7 +45,7 @@ public class BoardTest {
         // Attempt to make a move in an invalid column (3)
         board.makeMove(0, 3, 3);
         // Verify the cell remains unchanged (should still be 0)
-        assertEquals(0, board.getCell(0, 0, 3));
+        assertEquals(Cell.EMPTY, board.getCell(0, 0, 3));
     }
 
     @Test
@@ -52,8 +53,8 @@ public class BoardTest {
         // Make a valid move
         board.makeMove(0, 0, 3);
         // Verify that the cell is updated correctly
-        assertEquals(1, board.getCell(0, 0, 3));
+        assertEquals(Cell.CROSS, board.getCell(0, 0, 3));
         // Check the turn has switched
-        assertEquals('O', board.getTurn());
+        assertEquals('B', board.getTurn());
     }
 }

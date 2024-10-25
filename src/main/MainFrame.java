@@ -1,9 +1,14 @@
 package src.main;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
+
+import src.main.Board.Cell;
+import src.main.Board.GameState;
 
 public class MainFrame extends JFrame{
 
@@ -14,14 +19,23 @@ public class MainFrame extends JFrame{
 	public static final int CELL_PADDING = CELL_SIZE / 6;
 	public static final int SYMBOL_SIZE = CELL_SIZE - CELL_PADDING * 2; 
 	public static final int SYMBOL_STROKE_WIDTH = 8; 
+
     public static int numberchosen = 3; 
 
 	private int CANVAS_WIDTH;
 	private int CANVAS_HEIGHT;
 
     public GameBoardCanvas gameBoardCanvas; 
+    private JLabel gameStatusBar;
 
     public Board board;
+    public static String GameType;
+    protected char turn;
+    public char playersChoice; 
+
+    public enum GameMode {
+		SIMPLE, GENERAL
+	}
 
 
     public MainFrame(Board board){
@@ -33,7 +47,8 @@ public class MainFrame extends JFrame{
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true); 
     }
-    private void setContentPane(){
+
+    public void setContentPane(){
 		gameBoardCanvas = new GameBoardCanvas();  
 		CANVAS_WIDTH = CELL_SIZE * numberchosen;  
 		CANVAS_HEIGHT = CELL_SIZE * numberchosen;
@@ -42,6 +57,30 @@ public class MainFrame extends JFrame{
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
         JButton b1 = new JButton("New Game");
+
+        b1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                dispose();
+                String desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
+                int ans = Integer.parseInt(desiredNumber);
+                while (ans > 10 || ans < 3){
+                    desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
+                    ans = Integer.parseInt(desiredNumber);
+                }
+                numberchosen = ans; 
+                SwingUtilities.invokeLater(new Runnable (){
+                    public void run (){
+                        // new MainFrame(new Board (numberchosen));
+                         if (GameType == "general"){
+                             new MainFrame(new GeneralBoard(numberchosen));
+                         }else{
+                             new MainFrame(new SimpleBoard(numberchosen));
+                         }
+                     }
+                });
+                System.out.println("You clicked the button load");
+            }
+        });  
 
         ButtonGroup redPlayer = new ButtonGroup();
         JLabel humanPlayer = new JLabel("Red player");
@@ -69,6 +108,20 @@ public class MainFrame extends JFrame{
         generalGame.setText("General Game");
         gameModes.add(simpleGame);
         gameModes.add(generalGame); 
+        simpleGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                //Here goes the action (method) you want to execute when clicked
+                GameType = "simple";
+                System.out.println("Simple game");
+            }
+        });  
+        generalGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                //Here goes the action (method) you want to execute when clicked
+                GameType = "general";
+                 System.out.println("general game");
+            }
+        });  
 
  
         JPanel gameOptions = new JPanel();
@@ -81,6 +134,18 @@ public class MainFrame extends JFrame{
         playerOne.add(humanPlayer, BorderLayout.NORTH);
         playerOne.add(humanPlayerS, BorderLayout.CENTER);
         playerOne.add(humanPlayerO, BorderLayout.SOUTH);
+        
+        humanPlayerS.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 board.setPlayersPref('S'); 
+            }
+        });  
+
+        humanPlayerO.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 board.setPlayersPref('O'); 
+            }
+        });
 
         JPanel playerTwo = new JPanel();
         playerTwo.add(compPlayer, BorderLayout.EAST);
@@ -88,10 +153,15 @@ public class MainFrame extends JFrame{
         playerTwo.add(compPlayerO, BorderLayout.EAST);
         contentPane.setLayout(new BorderLayout());
 
+        gameStatusBar = new JLabel("  ");
+        gameStatusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
+		gameStatusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
+
         contentPane.add(gameOptions, BorderLayout.NORTH);
         contentPane.add(playerOne, BorderLayout.WEST);
 		contentPane.add(gameBoardCanvas, BorderLayout.CENTER);
         contentPane.add(playerTwo, BorderLayout.EAST);
+        contentPane.add(gameStatusBar, BorderLayout.PAGE_END);
 	}
 
 	class GameBoardCanvas extends JPanel {
@@ -101,18 +171,20 @@ public class MainFrame extends JFrame{
 				public void mouseClicked(MouseEvent e) {  
 						int rowSelected = e.getY() / CELL_SIZE;
 						int colSelected = e.getX() / CELL_SIZE;
-						board.makeMove(rowSelected, colSelected, numberchosen);
-					repaint(); 
+                        board.makeMove(rowSelected, colSelected, numberchosen);
+					    repaint();
 				}
 			});
 		}
-		
+
+
 		@Override
 		public void paintComponent(Graphics g) { 
 			super.paintComponent(g);   
 			setBackground(Color.WHITE);
 			drawGridLines(g, numberchosen);
 			drawBoard(g);
+            printStatusBar();
 		}
 		
 		private void drawGridLines(Graphics g, int numberchosen){
@@ -135,22 +207,44 @@ public class MainFrame extends JFrame{
 				for (int col = 0; col < numberchosen; col++) {
 					int x1 = col * CELL_SIZE + CELL_PADDING;
 					int y1 = row * CELL_SIZE + CELL_PADDING;
-					if (board.getCell(row,col, numberchosen) == 1) {
+					if (board.getCell(row,col, numberchosen) == Cell.CROSS) {
 						g2d.setColor(Color.BLACK);
 						int y2 = (row + 1) * CELL_SIZE - (CELL_PADDING * 3) ;
                         g2d.drawArc( x1, y1, SYMBOL_SIZE / 2, SYMBOL_SIZE / 2, 90, 180);
                         g2d.drawArc( x1, y2 , SYMBOL_SIZE / 2, SYMBOL_SIZE / 2, 90, -180);
-					} else if (board.getCell(row,col, numberchosen) == 2) {
+					} else if (board.getCell(row,col, numberchosen) == Cell.NOUGHT) {
 						g2d.setColor(Color.BLACK);
 						g2d.drawOval(x1, y1, SYMBOL_SIZE, SYMBOL_SIZE);
 					}
 				}
 			}
 		}
+        private void printStatusBar() {
+			if (board.getGameState() == GameState.PLAYING) {
+				gameStatusBar.setForeground(Color.BLACK);
+				if (board.getTurn() == 'R') {
+					gameStatusBar.setText("Red's Turn" + playersChoice);
+				} else {
+					gameStatusBar.setText("Blue's Turn");
+				}
+			} else if (board.getGameState() == GameState.DRAW) {
+				gameStatusBar.setForeground(Color.MAGENTA);
+				gameStatusBar.setText("It's a Draw! Click to play again.");
+			} else if (board.getGameState() == GameState.CROSS_WON) {
+				gameStatusBar.setForeground(Color.RED);
+				gameStatusBar.setText("Red Won! Click to play again.");
+			} else if (board.getGameState() == GameState.NOUGHT_WON) {
+				gameStatusBar.setForeground(Color.BLUE);
+				gameStatusBar.setText("Blue Won! Click to play again.");
+			}
+		}
+
+        
 
 	}
 
 
+    
     public static void main(String[] args) {
         String desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
         int ans = Integer.parseInt(desiredNumber);
@@ -161,7 +255,13 @@ public class MainFrame extends JFrame{
         numberchosen = ans; 
         SwingUtilities.invokeLater(new Runnable (){
             public void run (){
-                new MainFrame(new Board (numberchosen)); 
+               // new MainFrame(new Board (numberchosen));
+                if (GameType == "general"){
+                    new MainFrame(new GeneralBoard(numberchosen));
+                }
+                {
+                    new MainFrame(new SimpleBoard(numberchosen));
+                }
             }
         });
     }
