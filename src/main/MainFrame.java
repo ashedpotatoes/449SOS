@@ -29,7 +29,7 @@ public class MainFrame extends JFrame{
     private JLabel gameStatusBar;
 
     public Board board;
-    public static String GameType;
+    public static String GameType, redPlayerType, bluePlayerType; 
     protected char turn;
     public char playersChoice; 
 
@@ -58,29 +58,7 @@ public class MainFrame extends JFrame{
 		contentPane.setLayout(new BorderLayout());
         JButton b1 = new JButton("New Game");
 
-        b1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e)            {
-                dispose();
-                String desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
-                int ans = Integer.parseInt(desiredNumber);
-                while (ans > 10 || ans < 3){
-                    desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
-                    ans = Integer.parseInt(desiredNumber);
-                }
-                numberchosen = ans; 
-                SwingUtilities.invokeLater(new Runnable (){
-                    public void run (){
-                        // new MainFrame(new Board (numberchosen));
-                         if (GameType == "general"){
-                             new MainFrame(new GeneralBoard(numberchosen));
-                         }else{
-                             new MainFrame(new SimpleBoard(numberchosen));
-                         }
-                     }
-                });
-                System.out.println("You clicked the button load");
-            }
-        });  
+        b1.addActionListener(resetAction);
 
         ButtonGroup redPlayer = new ButtonGroup();
         JLabel humanPlayer = new JLabel("Red player");
@@ -125,15 +103,22 @@ public class MainFrame extends JFrame{
 
  
         JPanel gameOptions = new JPanel();
+
         gameOptions.add("Simple Game", simpleGame);
         gameOptions.add("General Game", generalGame);
         gameOptions.add(b1);
 
-
+    
         JPanel playerOne = new JPanel();
         playerOne.add(humanPlayer, BorderLayout.NORTH);
         playerOne.add(humanPlayerS, BorderLayout.CENTER);
         playerOne.add(humanPlayerO, BorderLayout.SOUTH);
+        JRadioButton humanPlayerR = new JRadioButton();
+        JRadioButton compPlayerR = new JRadioButton();
+        playerOne.add(humanPlayerR);
+        playerOne.add(compPlayerR);
+        humanPlayerR.setText("Human Player");
+        compPlayerR.setText("Computer Player");
         
         humanPlayerS.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)            {
@@ -146,12 +131,42 @@ public class MainFrame extends JFrame{
                  board.setPlayersPref('O'); 
             }
         });
+        humanPlayerR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 redPlayerType = "human";
+                 System.out.println("human is selected"); 
+            }
+        });
+        compPlayerR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 redPlayerType = "comp";
+                 System.out.println("comp is selected for r"); 
+            }
+        });
 
         JPanel playerTwo = new JPanel();
         playerTwo.add(compPlayer, BorderLayout.EAST);
         playerTwo.add(compPlayerS, BorderLayout.EAST);
         playerTwo.add(compPlayerO, BorderLayout.EAST);
+        JRadioButton humanPlayerB = new JRadioButton();
+        JRadioButton compPlayerB = new JRadioButton();
+        playerTwo.add(humanPlayerB);
+        playerTwo.add(compPlayerB);
+        humanPlayerB.setText("Human Opponent");
+        compPlayerB.setText("Computer Opponent");
         contentPane.setLayout(new BorderLayout());
+        humanPlayerB.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 bluePlayerType = "human";
+                 System.out.println("human is selected"); 
+            }
+        });
+        compPlayerB.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)            {
+                 bluePlayerType = "comp";
+                 System.out.println("comp is selected for b"); 
+            }
+        });
 
         gameStatusBar = new JLabel("  ");
         gameStatusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
@@ -243,26 +258,54 @@ public class MainFrame extends JFrame{
 
 	}
 
+    ActionListener resetAction = new ActionListener() {
+		public void actionPerformed(ActionEvent actionEvent) {
+            String desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
+            int ans = Integer.parseInt(desiredNumber);
+            while (ans > 10 || ans < 3){
+                desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
+                ans = Integer.parseInt(desiredNumber);
+            }
+            numberchosen = ans; 
+            SwingUtilities.invokeLater(new Runnable (){
+                public void run (){
+                    if (GameType == "general" && redPlayerType == "human" && bluePlayerType == "human"){
+                        new MainFrame(new GeneralBoard(numberchosen));
+                        System.out.println("general human");
+                    }
+                     if (GameType == "general" && redPlayerType == "comp" && bluePlayerType == "human"){
+                        new MainFrame(new AutoGeneralBoard('R', numberchosen));
+                        System.out.println("general human b");
+                    }
+                     if (GameType == "general" && redPlayerType == "human" && bluePlayerType == "comp"){
+                        new MainFrame(new AutoGeneralBoard('B', numberchosen));
+                    }
+                     if (GameType == "general" && redPlayerType == "comp" && bluePlayerType == "comp"){
+                        new MainFrame(new AutoGeneralBoard('Z', numberchosen));
+                    }
+                     if (GameType == "simple" && redPlayerType == "comp" && bluePlayerType == "human"){
+                        new MainFrame(new AutoSimpleBoard('R', numberchosen));
+                    }
+                     if (GameType == "simple" && redPlayerType == "human" && bluePlayerType == "comp"){
+                        new MainFrame(new AutoSimpleBoard('B', numberchosen));
+                    }
+                     if (GameType == "simple" && redPlayerType == "comp" && bluePlayerType == "comp"){
+                        new MainFrame(new AutoSimpleBoard('Z', numberchosen));
+                }
+                if (GameType == "simple" && redPlayerType == "human" && bluePlayerType == "human"){
+                    new MainFrame(new SimpleBoard(numberchosen));
+                    System.out.println("just defaults");
+                }
+                }
+            });
+			
+		}
+	};
+
+
 
     
     public static void main(String[] args) {
-        String desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
-        int ans = Integer.parseInt(desiredNumber);
-        while (ans > 10 || ans < 3){
-            desiredNumber = JOptionPane.showInputDialog("Please enter a board size [3, 10]");
-            ans = Integer.parseInt(desiredNumber);
-        }
-        numberchosen = ans; 
-        SwingUtilities.invokeLater(new Runnable (){
-            public void run (){
-               // new MainFrame(new Board (numberchosen));
-                if (GameType == "general"){
-                    new MainFrame(new GeneralBoard(numberchosen));
-                }
-                {
-                    new MainFrame(new SimpleBoard(numberchosen));
-                }
-            }
-        });
+        new MainFrame(new SimpleBoard(3));
     }
 }

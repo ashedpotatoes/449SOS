@@ -23,7 +23,7 @@ public class Board {
 		initGame(numberchosen);
 	}
 
-	private void initGame(int numberchosen) {
+	public void initGame(int numberchosen) {
 		for (int row = 0; row < numberchosen; ++row) {
 			for (int col = 0; col < numberchosen; ++col) {
 				grid[row][col] = Cell.EMPTY;
