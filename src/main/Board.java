@@ -11,6 +11,7 @@ public class Board {
 	public char playersChoice; 
 
 	public int redScore = 0, blueScore = 0;
+	protected RecordGame rec = new RecordGame();
 
 	public enum GameState {
 		PLAYING, DRAW, CROSS_WON, NOUGHT_WON, FINISHED
@@ -29,6 +30,7 @@ public class Board {
 				grid[row][col] = Cell.EMPTY;
 			}
 		}
+		rec.createFile(numberchosen, numberchosen);
 		currentGameState = GameState.PLAYING;
 		setTurn('R');
 	}

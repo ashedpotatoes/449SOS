@@ -18,12 +18,21 @@ public class SimpleBoard extends Board{
 
     public void makeMove(int row, int column, int numberchosen) {
 		String GameType = "simple";
+		String currentLetter;
+		if(getPlayersPref() == 'S' && getTurn() == 'R'){
+			currentLetter = "S";
+		} else{
+			currentLetter = "O";
+		}
+		
 		if (row >= 0 && row < numberchosen && column >= 0 && column < numberchosen && grid[row][column] == Cell.EMPTY && getGameState() == GameState.PLAYING && GameType == "simple") {
 			if(getPlayersPref() == 'S'){
 				grid[row][column] = (turn == 'R') ? Cell.CROSS : Cell.NOUGHT;
+				rec.recordMove(row, column, turn, currentLetter);
 			}
 			else{
 				grid[row][column] = (turn == 'R') ? Cell.NOUGHT : Cell.CROSS;
+				rec.recordMove(row, column, turn, currentLetter);
 			}
 			updateGameState(turn, row, column);
 			turn = (turn == 'R') ? 'B' : 'R';
@@ -32,8 +41,10 @@ public class SimpleBoard extends Board{
 
 	public void updateGameState(char turn, int row, int col) {
 		if (hasWon(row, col)) {
+			rec.recordSimWin(turn);
 			currentGameState = (turn == 'B') ? GameState.NOUGHT_WON : GameState.CROSS_WON;
 		} else if (isDraw()) {
+			rec.recordDraw();
 			currentGameState = GameState.DRAW;
             System.out.println(currentGameState);
 		}

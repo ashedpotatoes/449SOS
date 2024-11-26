@@ -76,8 +76,10 @@ public class GeneralBoard extends Board{
 			}
 		
 			if (turn == 'B' && addScore > 0) {
+				rec.recordMatch(row, col, turn, blueScore);
 				blueScore += addScore;
 			} else if (turn == 'R' && addScore > 0) {
+				rec.recordMatch(row, col, turn, redScore);
 				redScore += addScore;
 			}
 		}
@@ -86,12 +88,20 @@ public class GeneralBoard extends Board{
 
 	@Override
     public void makeMove(int row, int column, int numberchosen) {
+		String currentLetter;
+		if(getPlayersPref() == 'S' && getTurn() == 'R'){
+			currentLetter = "S";
+		} else{
+			currentLetter = "O";
+		}
 		if (row >= 0 && row < numberchosen && column >= 0 && column < numberchosen && grid[row][column] == Cell.EMPTY) {
 			if(getPlayersPref() == 'S'){
 				grid[row][column] = (turn == 'R') ? Cell.CROSS : Cell.NOUGHT;
+				rec.recordMove(row, column, turn, currentLetter);
 			}
 			else{
 				grid[row][column] = (turn == 'R') ? Cell.NOUGHT : Cell.CROSS;
+				rec.recordMove(row, column, turn, currentLetter);
 			}
 			if (madeMatch(row, column) > 0) {
 				updateGameState();
@@ -108,8 +118,10 @@ public class GeneralBoard extends Board{
 			currentGameState = GameState.DRAW;
 		} else if (Won()) {
 			if (redScore > blueScore) {
+				rec.recordGenWin(turn, redScore);
 				currentGameState = GameState.CROSS_WON;
 			} else {
+				rec.recordGenWin(turn, blueScore);
 				currentGameState = GameState.NOUGHT_WON;
 			}
 		}

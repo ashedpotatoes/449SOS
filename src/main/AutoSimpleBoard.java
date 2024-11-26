@@ -16,6 +16,7 @@ public class AutoSimpleBoard extends SimpleBoard{
 				if (grid[i][j] == Cell.EMPTY) {
 					grid[i][j] = Cell.CROSS;
 					if (hasWon(i, j)) {
+						rec.recordMove(i, j, turn, "S");
 						updateGameState(turn, i, j);
 						return true;
 					} else {
@@ -52,8 +53,10 @@ public class AutoSimpleBoard extends SimpleBoard{
 					} while (grid[randRow][randCol] != Cell.EMPTY);
 					
 					if (randInt < 13) {
+						rec.recordMove(randRow, randCol, turn, "O");
 						grid[randRow][randCol] = Cell.NOUGHT;
 					} else {
+						rec.recordMove(randRow, randCol, turn, "S");
 						grid[randRow][randCol] = Cell.CROSS;
 					}
 					updateGameState(turn, randRow, randCol);
@@ -66,8 +69,10 @@ public class AutoSimpleBoard extends SimpleBoard{
 						
 						randInt = rand.nextInt(2);
 						if (randInt < 1) {
+							rec.recordMove(randRow, randCol, turn, "O");
 							grid[randRow][randCol] = Cell.NOUGHT;
 						} else {
+							rec.recordMove(randRow, randCol, turn, "S");
 							grid[randRow][randCol] = Cell.CROSS;
 						}
 						updateGameState(turn, randRow, randCol);
@@ -90,6 +95,7 @@ public class AutoSimpleBoard extends SimpleBoard{
 		Random rand = new Random();
 		int randRow = rand.nextInt(totalRows);
 		int randCol = rand.nextInt(totalCols);
+		rec.recordMove(randRow, randCol, turn, "S");
 		grid[randRow][randCol] = Cell.CROSS;
 		turn = (turn == 'B') ? 'R' : 'B';
 	}
